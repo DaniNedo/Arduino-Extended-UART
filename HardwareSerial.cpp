@@ -20,6 +20,7 @@
   Modified 28 September 2010 by Mark Sproul
   Modified 14 August 2012 by Alarus
   Modified 3 December 2013 by Matthijs Kooijman
+  Modified 2 November 2015 by SlashDev
   Modified 29 January 2017 by Nick Gammon for 9-bit characters
 */
 
@@ -264,6 +265,14 @@ size_t HardwareSerial::write9bit(uint16_t c)
   sbi(*_ucsrb, UDRIE0);
 
   return 1;
+}
+
+void HardwareSerial::attachInterrupt( isr_t fn )
+{
+  uint8_t oldSREG = SREG;
+  cli();
+    _isr = fn;
+  SREG = oldSREG;
 }
 
 #endif // whole file

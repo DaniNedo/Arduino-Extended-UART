@@ -19,6 +19,7 @@
   Modified 23 November 2006 by David A. Mellis
   Modified 28 September 2010 by Mark Sproul
   Modified 14 August 2012 by Alarus
+  Modified 2 November 2015 by SlashDev
   Modified 29 January 2017 by Nick Gammon for 9-bit characters
 */
 
@@ -118,6 +119,11 @@ void HardwareSerial::_rx_complete_irq(void)
       _rx_buffer[_rx_buffer_head] = c;
       _rx_buffer_head = i;
     }
+
+    // Callback call
+    if (_isr)
+      _isr( c );
+
   } else {
     // Parity error, read byte but discard it
     unsigned int c = (*_ucsrb & bit (RXB80)) << 7;   // get the 9th bit (it's already shifted over one)
