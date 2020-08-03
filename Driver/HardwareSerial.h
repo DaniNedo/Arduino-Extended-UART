@@ -21,6 +21,7 @@
   Modified 3 December 2013 by Matthijs Kooijman
   Modified 2 November 2015 by SlashDev
   Modified 29 January 2017 by Nick Gammon for 9-bit characters
+  Modified XX August 2020 by DaniNedo
 */
 
 #ifndef HardwareSerial_h
@@ -64,6 +65,10 @@ typedef uint8_t tx_buffer_index_t;
 typedef uint16_t rx_buffer_index_t;
 #else
 typedef uint8_t rx_buffer_index_t;
+#endif
+
+#ifndef MPCM
+#define MPCM 0
 #endif
 
 // Define config for Serial.begin(baud, config);
@@ -144,12 +149,18 @@ class HardwareSerial : public Stream
     inline void _rx_complete_irq(void);
     void _tx_udr_empty_irq(void);
 
-    typedef void (* isr_t)( uint8_t );
+    typedef void (* isr_t)(void);
     void attachInterrupt( isr_t fn );
     void detachInterrupt() { attachInterrupt( (isr_t) NULL ); };
 
+    void mute();
+    void wake();
+
   private:
     isr_t  _isr;
+
+    HardwareSerial( const HardwareSerial & );
+    HardwareSerial & operator =( const HardwareSerial &);
 };
 
 #if defined(UBRRH) || defined(UBRR0H)

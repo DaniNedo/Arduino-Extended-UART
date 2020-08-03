@@ -21,6 +21,7 @@
   Modified 14 August 2012 by Alarus
   Modified 2 November 2015 by SlashDev
   Modified 29 January 2017 by Nick Gammon for 9-bit characters
+  Modified XX August 2020 by DaniNedo
 */
 
 #include "wiring_private.h"
@@ -96,19 +97,24 @@ HardwareSerial::HardwareSerial(
     _ucsra(ucsra), _ucsrb(ucsrb), _ucsrc(ucsrc),
     _udr(udr),
     _rx_buffer_head(0), _rx_buffer_tail(0),
-    _tx_buffer_head(0), _tx_buffer_tail(0)
+    _tx_buffer_head(0), _tx_buffer_tail(0),
+    _isr(0)
 {
 }
 
 // Actual interrupt handlers //////////////////////////////////////////////////////////////
 
+// This interrupt is only triggered when address is received with the MCPM bit set,
+// if the MCPM bit is clear the interrupt occurs normally.
 void HardwareSerial::_rx_complete_irq(void)
 {
   if (bit_is_clear(*_ucsra, UPE0)) {
     // No Parity error, read byte and store it in the buffer if there is
     // room
-    unsigned int c = (*_ucsrb & bit (RXB80)) << 7;   // get the 9th bit (it's already shifted over one)
-    c |= *_udr;     // get remaining 8 bits
+
+    unsigned char s = *_ucsrb; // Must be read before reading the low bits from UDRn
+    unsigned char c = *_udr;
+
     rx_buffer_index_t i = (unsigned int)(_rx_buffer_head + 1) % SERIAL_RX_BUFFER_SIZE;
 
     // if we should be storing the received character into the location
@@ -122,7 +128,7 @@ void HardwareSerial::_rx_complete_irq(void)
 
     // Callback call
     if (_isr)
-      _isr( c );
+      _isr();
 
   } else {
     // Parity error, read byte but discard it

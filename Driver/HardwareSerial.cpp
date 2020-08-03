@@ -22,6 +22,7 @@
   Modified 3 December 2013 by Matthijs Kooijman
   Modified 2 November 2015 by SlashDev
   Modified 29 January 2017 by Nick Gammon for 9-bit characters
+  Modified XX August 2020 by DaniNedo
 */
 
 #include <stdlib.h>
@@ -271,8 +272,18 @@ void HardwareSerial::attachInterrupt( isr_t fn )
 {
   uint8_t oldSREG = SREG;
   cli();
-    _isr = fn;
+  _isr = fn;
   SREG = oldSREG;
+}
+
+void HardwareSerial::mute()
+{
+  *_ucsra |= bit (MPCM);
+}
+
+void HardwareSerial::wake()
+{
+  *_ucsra &= ~bit (MPCM);
 }
 
 #endif // whole file

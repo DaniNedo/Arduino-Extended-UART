@@ -1,0 +1,3 @@
+# Master and Slave Arduino examples
+
+Simple example using UART in 9-bit address mode. By default the slave is in mute mode, when the master sends the proper address, the slave wakes up and reads the remaining bytes. If the address and command bytes are correct, the slave turns on its LED for half a second an sends an acknowledge byte back to the master. If the master receives the acknowledge it turns on it LED for half a second as well.
